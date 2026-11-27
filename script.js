@@ -201,13 +201,26 @@ $('#bagItems').onclick=e=>{if(e.target.dataset.rm){bag.splice(+e.target.dataset.
 $('#bagOpen').onclick=()=>$('#drawer').hidden=false;$('#bagClose').onclick=()=>$('#drawer').hidden=true;
 $('#checkout').onclick=()=>{
   if(!bag.length)return;
+
   let m='CUSTOM NAIL ORDER 💅\n';
+
   bag.forEach((b,i)=>{
     m+=`\n*Set ${i+1}${b.type.startsWith('Ready')?' - '+b.type:''}* (₹${b.price||PRICE})\n`;
     if(b.shape)m+=`Shape: ${b.shape}\nLength: ${b.length}\nBase colour: ${b.color}\nFinish: ${b.finish}\nDesign: ${b.design}\nPer nail: ${b.perNail}\n`;
     m+=`Customer description:\n"${b.desc||'-'}"\nInspiration image: ${b.img?'Attached by customer separately ('+b.img+')':'None'}\n`;
   });
+
   m+=`\nEstimated price: ₹${total()}\nHi! I'd like to order this personalised nail set. ✨`;
+
+  // GA4 custom event: WhatsApp checkout click
+  if(typeof gtag === 'function'){
+    gtag('event', 'whatsapp_checkout_click', {
+      currency: 'INR',
+      value: total(),
+      items_count: bag.length
+    });
+  }
+
   window.open(`https://wa.me/${WA}?text=${encodeURIComponent(m)}`,'_blank','noopener');
 };
 // ready-made catalogue
